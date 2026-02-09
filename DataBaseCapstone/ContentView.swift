@@ -8,14 +8,19 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var hasSeenOnboarding = UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        Group {
+            if hasSeenOnboarding {
+                TodoListView()
+                    .transition(.opacity.combined(with: .scale))
+            } else {
+                OnboardingView(hasSeenOnboarding: $hasSeenOnboarding)
+                    .transition(.opacity.combined(with: .scale))
+            }
         }
-        .padding()
+        .animation(.easeInOut(duration: 0.5), value: hasSeenOnboarding)
     }
 }
 

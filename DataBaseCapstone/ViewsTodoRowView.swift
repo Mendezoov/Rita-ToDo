@@ -15,14 +15,19 @@ struct TodoRowView: View {
     let onToggleSelection: () -> Void
     
     @State private var scale: CGFloat = 1.0
+    @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
         HStack(spacing: 16) {
-            // Selection checkbox (in edit mode)
+            // Selection checkbox (in edit mode) - LEFT
             if isEditMode {
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .font(.title2)
-                    .foregroundStyle(isSelected ? .blue : .gray.opacity(0.5))
+                    .foregroundStyle(
+                        isSelected 
+                        ? LinearGradient(colors: [.blue, .purple], startPoint: .topLeading, endPoint: .bottomTrailing)
+                        : LinearGradient(colors: [.gray], startPoint: .topLeading, endPoint: .bottomTrailing)
+                    )
                     .onTapGesture {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                             onToggleSelection()
@@ -31,7 +36,28 @@ struct TodoRowView: View {
                     .transition(.scale.combined(with: .opacity))
             }
             
-            // Completion checkbox
+            // Content - MIDDLE
+            VStack(alignment: .leading, spacing: 6) {
+                Text(item.title)
+                    .font(.body.weight(.medium))
+                    .foregroundStyle(item.isCompleted ? .secondary : .primary)
+                    .strikethrough(item.isCompleted, color: .secondary)
+                
+                if !item.notes.isEmpty {
+                    Text(item.notes)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                }
+                
+                Text(item.createdAt.formatted(date: .abbreviated, time: .shortened))
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
+            
+            Spacer()
+            
+            // Completion checkbox - RIGHT
             Button {
                 withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
                     scale = 0.8
@@ -52,35 +78,14 @@ struct TodoRowView: View {
                         : LinearGradient(colors: [.gray.opacity(0.3)], startPoint: .topLeading, endPoint: .bottomTrailing)
                     )
             }
+            .buttonStyle(.plain)
             .scaleEffect(scale)
-            
-            // Content
-            VStack(alignment: .leading, spacing: 6) {
-                Text(item.title)
-                    .font(.body.weight(.medium))
-                    .foregroundStyle(item.isCompleted ? .secondary : .primary)
-                    .strikethrough(item.isCompleted, color: .secondary)
-                
-                if !item.notes.isEmpty {
-                    Text(item.notes)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(2)
-                }
-                
-                Text(item.createdAt.formatted(date: .abbreviated, time: .shortened))
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-            }
-            
-            Spacer()
         }
         .padding()
-        .background(
+        .background {
             RoundedRectangle(cornerRadius: 16)
-                .fill(.white)
-                .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 4)
-        )
+                .fill(.regularMaterial)
+        }
         .overlay(
             RoundedRectangle(cornerRadius: 16)
                 .stroke(

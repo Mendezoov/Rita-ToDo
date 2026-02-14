@@ -9,6 +9,7 @@ import SwiftUI
 
 struct AddEditTodoView: View {
     @Environment(\.dismiss) var dismiss
+    @Environment(\.colorScheme) private var colorScheme
     @ObservedObject var viewModel: TodoViewModel
     
     var itemToEdit: TodoItem?
@@ -25,9 +26,12 @@ struct AddEditTodoView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Gradient background
+                // Adaptive gradient background
                 LinearGradient(
-                    colors: [
+                    colors: colorScheme == .dark ? [
+                        Color(red: 0.05, green: 0.05, blue: 0.08),
+                        Color(red: 0.08, green: 0.05, blue: 0.1)
+                    ] : [
                         Color(red: 0.95, green: 0.97, blue: 1.0),
                         Color(red: 0.98, green: 0.95, blue: 1.0)
                     ],
@@ -46,11 +50,7 @@ struct AddEditTodoView: View {
                         TextField("Enter task title", text: $title)
                             .textFieldStyle(.plain)
                             .padding()
-                            .background(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .fill(.white)
-                                    .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
-                            )
+                            .glassEffect(.regular, in: .rect(cornerRadius: 16))
                     }
                     
                     // Notes field
@@ -59,15 +59,21 @@ struct AddEditTodoView: View {
                             .font(.subheadline.bold())
                             .foregroundStyle(.secondary)
                         
-                        TextEditor(text: $notes)
-                            .frame(height: 120)
-                            .padding(8)
-                            .scrollContentBackground(.hidden)
-                            .background(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .fill(.white)
-                                    .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
-                            )
+                        ZStack(alignment: .topLeading) {
+                            if notes.isEmpty {
+                                Text("Add notes here...")
+                                    .foregroundStyle(.tertiary)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 16)
+                            }
+                            
+                            TextEditor(text: $notes)
+                                .frame(height: 120)
+                                .padding(8)
+                                .scrollContentBackground(.hidden)
+                                .background(Color.clear)
+                        }
+                        .glassEffect(.regular, in: .rect(cornerRadius: 16))
                     }
                     
                     Spacer()
@@ -80,16 +86,28 @@ struct AddEditTodoView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+                    Button {
                         dismiss()
+                    } label: {
+                        Text("Cancel")
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
                     }
+                    .foregroundStyle(.red)
+              //   .buttonStyle(.glassProminent)
+                    
+                    
                 }
                 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(isEditMode ? "Update" : "Add") {
+                    Button {
                         saveItem()
+                    } label: {
+                        Text(isEditMode ? "Update" : "Add")
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
                     }
-                    .fontWeight(.semibold)
+                    .buttonStyle(.glassProminent)
                     .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             }

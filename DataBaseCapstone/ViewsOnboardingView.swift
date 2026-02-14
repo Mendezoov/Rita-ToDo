@@ -9,6 +9,7 @@ import SwiftUI
 
 struct OnboardingView: View {
     @Binding var hasSeenOnboarding: Bool
+    @Environment(\.colorScheme) private var colorScheme
     @State private var scale: CGFloat = 0.5
     @State private var opacity: Double = 0
     @State private var rotation: Double = 0
@@ -18,9 +19,13 @@ struct OnboardingView: View {
     
     var body: some View {
         ZStack {
-            // Animated gradient background
+            // Adaptive animated gradient background
             LinearGradient(
-                colors: [
+                colors: colorScheme == .dark ? [
+                    Color(red: 0.15, green: 0.1, blue: 0.3),
+                    Color(red: 0.3, green: 0.15, blue: 0.4),
+                    Color(red: 0.4, green: 0.2, blue: 0.5)
+                ] : [
                     Color(red: 0.4, green: 0.2, blue: 0.8),
                     Color(red: 0.8, green: 0.3, blue: 0.6),
                     Color(red: 1.0, green: 0.5, blue: 0.3)
@@ -80,30 +85,24 @@ struct OnboardingView: View {
                 
                 Spacer()
                 
-                // Get Started button
+                // Get Started button with Liquid Glass
                 Button {
                     withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
                         hasSeenOnboarding = true
                         UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
                     }
                 } label: {
-                    HStack {
+                    HStack(spacing: 12) {
                         Text("Get Started")
                             .font(.title3.bold())
                         Image(systemName: "arrow.right")
+                            .font(.title3.bold())
                     }
                     .foregroundStyle(.white)
                     .padding(.horizontal, 50)
                     .padding(.vertical, 18)
-                    .background(
-                        Capsule()
-                            .fill(.white.opacity(0.2))
-                            .overlay(
-                                Capsule()
-                                    .stroke(.white.opacity(0.5), lineWidth: 2)
-                            )
-                    )
                 }
+                .buttonStyle(.glassProminent)
                 .scaleEffect(scale)
                 .opacity(opacity)
                 .padding(.bottom, 60)
